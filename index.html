@@ -66,7 +66,8 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .log-count { background: #222; color: #fff; border-radius: 20px; padding: 2px 10px; font-size: 12px; margin-left: 8px; }
 .btn-clear { background: none; border: 1px solid #ddd; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #888; cursor: pointer; font-family: inherit; }
 .log-empty { color: #aaa; font-size: 13px; text-align: center; padding: 24px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
-.log-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.log-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+.log-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .log-name { font-size: 14px; font-weight: 700; }
 .log-detail { font-size: 12px; color: #888; margin-top: 3px; }
 .log-time { font-size: 11px; color: #bbb; margin-top: 4px; }
@@ -74,7 +75,26 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 .log-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
 .btn-copy-sms { background: none; border: 1px solid #ddd; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #555; cursor: pointer; font-family: inherit; white-space: nowrap; }
 .btn-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; }
-@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+.btn-edit { background: none; border: 1px solid #ddd; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #555; cursor: pointer; font-family: inherit; white-space: nowrap; }
+
+/* 인라인 수정 영역 */
+.log-edit-area { display: none; margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+.log-edit-area.open { display: block; }
+.log-edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.log-edit-row.single { grid-template-columns: 1fr; }
+.log-edit-label { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 3px; display: block; }
+.log-edit-input, .log-edit-select, .log-edit-textarea { width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; font-family: inherit; background: #fff; outline: none; }
+.log-edit-input:focus, .log-edit-select:focus, .log-edit-textarea:focus { border-color: #888; }
+.log-edit-textarea { resize: vertical; min-height: 60px; }
+.log-edit-btns { display: flex; gap: 8px; margin-top: 8px; }
+.btn-save-edit { flex: 1; padding: 8px; background: #222; color: #fff; border: none; border-radius: 5px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-save-edit:hover { background: #444; }
+.btn-cancel-edit { flex: 1; padding: 8px; background: none; color: #888; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; cursor: pointer; font-family: inherit; }
+
+/* 송장번호 뱃지 */
+.log-invoice { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-top: 4px; }
+
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } .log-edit-row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -343,6 +363,11 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
       </div>
     </div>
 
+    <div class="form-group">
+      <label class="form-label">송장번호</label>
+      <input class="form-input" id="f-invoice" type="text" placeholder="송장번호 입력 (선택)">
+    </div>
+
     <button class="btn-submit" onclick="submitLog()">저장</button>
     <div class="success-msg" id="success-msg">저장됐어요!</div>
   </div>
@@ -533,6 +558,7 @@ function submitLog() {
   var memo = document.getElementById('f-memo').value.trim();
   var status = document.getElementById('f-status').value;
   var staff = document.getElementById('f-staff').value.trim();
+  var invoice = document.getElementById('f-invoice').value.trim();
   var orderItems = (type === '주문') ? getOrderItems() : [];
   var shipFee = getShippingFee();
   var orderTotal = getOrderTotal();
@@ -542,13 +568,13 @@ function submitLog() {
     id: Date.now(),
     time: new Date().toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
     name: name, phone: phone, brand: brand, type: type, address: address, receipt: receipt,
-    memo: memo, status: status, staff: staff, orderItems: orderItems, smsText: smsText
+    memo: memo, status: status, staff: staff, invoice: invoice, orderItems: orderItems, smsText: smsText
   };
   logs.unshift(log);
   localStorage.setItem('cs-logs', JSON.stringify(logs));
   sendToSheet(log);
   renderLogs();
-  ['f-name','f-phone','f-address','f-receipt','f-memo','f-staff'].forEach(function(id) { document.getElementById(id).value = ''; });
+  ['f-name','f-phone','f-address','f-receipt','f-memo','f-staff','f-invoice'].forEach(function(id) { document.getElementById(id).value = ''; });
   document.getElementById('f-brand').value = '';
   document.getElementById('f-type').value = '';
   document.getElementById('f-status').value = '완료';
@@ -560,22 +586,108 @@ function submitLog() {
   setTimeout(function() { msg.style.display = 'none'; }, 3000);
 }
 
+/* ── 수정 패널 토글 ── */
+function toggleEdit(id) {
+  var area = document.getElementById('edit-' + id);
+  if (!area) return;
+  var isOpen = area.classList.contains('open');
+  // 다른 열린 패널 모두 닫기
+  document.querySelectorAll('.log-edit-area.open').forEach(function(a) { a.classList.remove('open'); });
+  if (!isOpen) area.classList.add('open');
+}
+
+/* ── 수정 저장 ── */
+function saveEdit(id) {
+  var log = logs.find(function(l) { return l.id === id; });
+  if (!log) return;
+  log.name    = document.getElementById('e-name-'    + id).value.trim() || log.name;
+  log.phone   = document.getElementById('e-phone-'   + id).value.trim();
+  log.brand   = document.getElementById('e-brand-'   + id).value;
+  log.type    = document.getElementById('e-type-'    + id).value;
+  log.address = document.getElementById('e-address-' + id).value.trim();
+  log.receipt = document.getElementById('e-receipt-' + id).value.trim();
+  log.memo    = document.getElementById('e-memo-'    + id).value.trim();
+  log.status  = document.getElementById('e-status-'  + id).value;
+  log.staff   = document.getElementById('e-staff-'   + id).value.trim();
+  log.invoice = document.getElementById('e-invoice-' + id).value.trim();
+  localStorage.setItem('cs-logs', JSON.stringify(logs));
+  renderLogs();
+}
+
+var STATUS_STYLE = {
+  '완료':     'background:#e8f5e9;color:#2e7d32;',
+  '처리 중':  'background:#fff3e0;color:#e65100;',
+  '인계 필요':'background:#ede7f6;color:#512da8;'
+};
+
 function renderLogs() {
   var list = document.getElementById('log-list');
   document.getElementById('log-count').textContent = logs.length;
-  if (logs.length === 0) { list.innerHTML = '<div class="log-empty">아직 접수 기록이 없어요.</div>'; return; }
-  var ss = { '완료': 'background:#e8f5e9;color:#2e7d32;', '처리 중': 'background:#fff3e0;color:#e65100;', '인계 필요': 'background:#ede7f6;color:#512da8;' };
+  if (logs.length === 0) {
+    list.innerHTML = '<div class="log-empty">아직 접수 기록이 없어요.</div>';
+    return;
+  }
+
   list.innerHTML = logs.map(function(l) {
-    return '<div class="log-item">'
-      + '<div><div class="log-name">' + l.name + (l.phone ? ' <span style="font-weight:400;color:#aaa;font-size:12px;">' + l.phone + '</span>' : '') + '</div>'
+    var id = l.id;
+    var brandOpts = ['푸른숲','하이라이트(셀렉스)'].map(function(v) {
+      return '<option' + (l.brand === v ? ' selected' : '') + '>' + v + '</option>';
+    }).join('');
+    var typeOpts = ['오류/불량','교환 접수','주문','카트리지 교체','기기 교체(구형→신형)','AS 접수','기타'].map(function(v) {
+      return '<option' + (l.type === v ? ' selected' : '') + '>' + v + '</option>';
+    }).join('');
+    var statusOpts = ['완료','처리 중','인계 필요'].map(function(v) {
+      return '<option' + (l.status === v ? ' selected' : '') + '>' + v + '</option>';
+    }).join('');
+
+    return '<div class="log-item" id="logitem-' + id + '">'
+      // ── 상단 요약 ──
+      + '<div class="log-item-top">'
+      + '<div>'
+      + '<div class="log-name">' + l.name + (l.phone ? ' <span style="font-weight:400;color:#aaa;font-size:12px;">' + l.phone + '</span>' : '') + '</div>'
       + '<div class="log-detail">' + (l.brand ? l.brand + ' · ' : '') + l.type + (l.staff ? ' · ' + l.staff : '') + '</div>'
       + (l.memo ? '<div class="log-detail" style="color:#555;margin-top:3px;">' + l.memo + '</div>' : '')
-      + '<div class="log-time">' + l.time + '</div></div>'
-      + '<div class="log-actions"><span class="log-status" style="' + (ss[l.status] || '') + '">' + l.status + '</span>'
-      + (l.smsText ? '<button class="btn-copy-sms" onclick="copyText(' + l.id + ')">📋 문자 복사</button>' : '')
-      + '<button class="btn-del" onclick="deleteLog(' + l.id + ')">✕</button></div>'
+      + (l.invoice ? '<div class="log-invoice">🚚 ' + l.invoice + '</div>' : '')
+      + '<div class="log-time">' + l.time + '</div>'
+      + '</div>'
+      + '<div class="log-actions">'
+      + '<span class="log-status" style="' + (STATUS_STYLE[l.status] || '') + '">' + l.status + '</span>'
+      + '<button class="btn-edit" onclick="toggleEdit(' + id + ')">✏️ 수정</button>'
+      + (l.smsText ? '<button class="btn-copy-sms" onclick="copyText(' + id + ')">📋 문자 복사</button>' : '')
+      + '<button class="btn-del" onclick="deleteLog(' + id + ')">✕</button>'
+      + '</div>'
+      + '</div>'
+
+      // ── 인라인 수정 패널 ──
+      + '<div class="log-edit-area" id="edit-' + id + '">'
+      + '<div class="log-edit-row">'
+      + '<div><label class="log-edit-label">고객 성함</label><input class="log-edit-input" id="e-name-' + id + '" value="' + esc(l.name) + '"></div>'
+      + '<div><label class="log-edit-label">연락처</label><input class="log-edit-input" id="e-phone-' + id + '" value="' + esc(l.phone||'') + '"></div>'
+      + '</div>'
+      + '<div class="log-edit-row">'
+      + '<div><label class="log-edit-label">브랜드</label><select class="log-edit-select" id="e-brand-' + id + '"><option value="">선택</option>' + brandOpts + '</select></div>'
+      + '<div><label class="log-edit-label">문의 유형</label><select class="log-edit-select" id="e-type-' + id + '"><option value="">선택</option>' + typeOpts + '</select></div>'
+      + '</div>'
+      + '<div class="log-edit-row single"><label class="log-edit-label">고객 주소</label><input class="log-edit-input" id="e-address-' + id + '" value="' + esc(l.address||'') + '"></div>'
+      + '<div class="log-edit-row single"><label class="log-edit-label">현금영수증 번호</label><input class="log-edit-input" id="e-receipt-' + id + '" value="' + esc(l.receipt||'') + '"></div>'
+      + '<div class="log-edit-row single"><label class="log-edit-label">처리 내용</label><textarea class="log-edit-textarea" id="e-memo-' + id + '">' + esc(l.memo||'') + '</textarea></div>'
+      + '<div class="log-edit-row">'
+      + '<div><label class="log-edit-label">처리 상태</label><select class="log-edit-select" id="e-status-' + id + '">' + statusOpts + '</select></div>'
+      + '<div><label class="log-edit-label">담당자</label><input class="log-edit-input" id="e-staff-' + id + '" value="' + esc(l.staff||'') + '"></div>'
+      + '</div>'
+      + '<div class="log-edit-row single"><label class="log-edit-label">송장번호</label><input class="log-edit-input" id="e-invoice-' + id + '" value="' + esc(l.invoice||'') + '" placeholder="송장번호 (선택)"></div>'
+      + '<div class="log-edit-btns">'
+      + '<button class="btn-save-edit" onclick="saveEdit(' + id + ')">저장</button>'
+      + '<button class="btn-cancel-edit" onclick="toggleEdit(' + id + ')">취소</button>'
+      + '</div>'
+      + '</div>'
+
       + '</div>';
   }).join('');
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function copyText(id) {
