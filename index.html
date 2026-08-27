@@ -188,6 +188,32 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
     </div></div>
   </div>
 
+  <div class="section-label">A/S 센터 연락처</div>
+
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this.closest('.card'))"><span class="card-tag">연락처</span><span class="card-title">A/S 센터 전화번호</span><span class="chevron">▾</span></div>
+    <div class="card-body">
+      <div class="product-table" style="margin-top:12px;">
+        <div class="product-row"><span>이온수기 (HDR)</span><div class="product-price">1644-4124</div></div>
+        <div class="product-row"><span>하우치 공기청정기</span><div><div class="product-price">031-946-4494</div><div class="product-cycle">A/S 070-8765-0032</div></div></div>
+        <div class="product-row"><span>믹서기</span><div class="product-price">02-584-7727</div></div>
+        <div class="product-row"><span>카타 / 노도</span><div class="product-price">010-4691-9005</div></div>
+        <div class="product-row"><span>웰쿡 (압력밥솥)</span><div class="product-price">031-879-6676</div></div>
+        <div class="product-row"><span>슐러 (전기레인지 1구)</span><div class="product-price">1522-9844</div></div>
+        <div class="product-row"><span>셀렉스 (전기레인지 3구)</span><div class="product-price">1588-2860</div></div>
+        <div class="product-row"><span>푸른숲 (피톤치드 휘산기)</span><div class="product-price">010-6720-1203</div></div>
+        <div class="product-row"><span>숲에서 (피톤치드 구형 리필액)</span><div class="product-price">070-7123-9898</div></div>
+        <div class="product-row"><span>탄소매트</span><div class="product-price">080-014-7777</div></div>
+      </div>
+      <div class="note" style="margin-top:12px;"><strong>셀렉스(3구) 참고사항</strong><br>
+        · 오후 5시 마감<br>
+        · 동판 10년 무상교체<br>
+        · 유상 A/S 5년<br>
+        · 이전 설치 시 매장 쪽으로 연결
+      </div>
+    </div>
+  </div>
+
   <div class="section-label">배송/정산</div>
 
   <div class="card">
@@ -388,7 +414,7 @@ body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; backgrou
 
 <script>
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxCNkSl_lwCVyn1ASlXQgDCov-xSOVLbagP9hR8JZln0aI_iNwLRqKB8RnT2otB7sZl/exec';
-  
+
 function showTab(tab, el) {
   document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
   document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
@@ -595,17 +621,16 @@ function submitLog() {
   setTimeout(function() { msg.style.display = 'none'; }, 3000);
 }
 
-/* ── 수정 패널 토글 ── */
+/* 수정 패널 토글 */
 function toggleEdit(id) {
   var area = document.getElementById('edit-' + id);
   if (!area) return;
   var isOpen = area.classList.contains('open');
-  // 다른 열린 패널 모두 닫기
   document.querySelectorAll('.log-edit-area.open').forEach(function(a) { a.classList.remove('open'); });
   if (!isOpen) area.classList.add('open');
 }
 
-/* ── 수정 저장 ── */
+/* 수정 저장 */
 function saveEdit(id) {
   var log = logs.find(function(l) { return l.id === id; });
   if (!log) return;
@@ -650,7 +675,6 @@ function renderLogs() {
     }).join('');
 
     return '<div class="log-item" id="logitem-' + id + '">'
-      // ── 상단 요약 ──
       + '<div class="log-item-top">'
       + '<div>'
       + '<div class="log-name">' + l.name + (l.phone ? ' <span style="font-weight:400;color:#aaa;font-size:12px;">' + l.phone + '</span>' : '') + '</div>'
@@ -667,7 +691,6 @@ function renderLogs() {
       + '</div>'
       + '</div>'
 
-      // ── 인라인 수정 패널 ──
       + '<div class="log-edit-area" id="edit-' + id + '">'
       + '<div class="log-edit-row">'
       + '<div><label class="log-edit-label">고객 성함</label><input class="log-edit-input" id="e-name-' + id + '" value="' + esc(l.name) + '"></div>'
