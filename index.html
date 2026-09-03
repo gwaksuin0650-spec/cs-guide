@@ -432,11 +432,12 @@ var SMS = {
       + '제품을 아래 주소로 보내주세요' + NL + '경기도 김포시 걸포로 174, 4층(걸포동)' + NL + NL
       + '수령 후 새 제품으로 교환 발송해 드리겠습니다.' + NL + NL + '감사합니다.' + NOTICE;
   },
-  '주문': function(n, b, addr, rcpt, shipFee, total) {
+  '주문': function(n, b, addr, rcpt, shipFee, total, itemsText) {
     var amt = total ? total.toLocaleString() + '원' : '담당자 확인';
     var fee = shipFee === 0 ? '무료' : '3,000원 포함';
-    var msg = '안녕하세요, ' + n + ' 고객님.' + NL + b + ' 주문 접수가 완료되었습니다.' + NL + NL
-      + '입금 계좌' + NL + '기업은행 455-0635-66-04-028' + NL + '(주식회사 디알코스메틱)' + NL
+    var msg = '안녕하세요, ' + n + ' 고객님.' + NL + b + ' 주문 접수가 완료되었습니다.' + NL + NL;
+    if (itemsText) { msg += '[주문 내역]' + NL + itemsText + NL + NL; }
+    msg += '입금 계좌' + NL + '기업은행 455-0635-66-04-028' + NL + '(주식회사 디알코스메틱)' + NL
       + '입금 금액: ' + amt + NL + '(배송비 ' + fee + ')' + NL + NL;
     if (addr && rcpt) {
       msg += '배송지: ' + addr + NL + '현금영수증: ' + rcpt + NL + NL;
@@ -483,6 +484,19 @@ function getShippingFee() {
     }
   });
   return (hasSet || totalQty >= 4) ? 0 : 3000;
+}
+
+function getOrderItemsText() {
+  var lines = [];
+  document.querySelectorAll('.order-row-item').forEach(function(row) {
+    var sel = row.querySelector('select');
+    var qty = parseInt((row.querySelector('input') || {}).value) || 1;
+    if (sel && sel.value) {
+      var p = sel.value.split('|');
+      lines.push(p[1] + ' ' + qty + '개');
+    }
+  });
+  return lines.join(NL);
 }
 
 function getOrderTotal() {
@@ -552,7 +566,7 @@ function updateSMSPreview() {
   var orderTotal = getOrderTotal();
   var finalTotal = orderTotal > 0 ? orderTotal + shipFee : 0;
   box.style.display = 'block';
-  document.getElementById('sms-preview-text').textContent = SMS[type](name, brand, address, receipt, shipFee, finalTotal);
+  document.getElementById('sms-preview-text').textContent = SMS[type](name, brand, address, receipt, shipFee, finalTotal, getOrderItemsText());
 }
 
 var logs = JSON.parse(localStorage.getItem('cs-logs') || '[]');
@@ -589,7 +603,7 @@ function submitLog() {
   var shipFee = getShippingFee();
   var orderTotal = getOrderTotal();
   var finalTotal = orderTotal > 0 ? orderTotal + shipFee : 0;
-  var smsText = SMS[type] ? SMS[type](name || '고객', brand || '제품', address, receipt, shipFee, finalTotal) : '';
+  var smsText = SMS[type] ? SMS[type](name || '고객', brand || '제품', address, receipt, shipFee, finalTotal, getOrderItemsText()) : '';
   var log = {
     id: Date.now(),
     time: new Date().toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
